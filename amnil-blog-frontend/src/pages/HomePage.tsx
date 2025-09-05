@@ -25,7 +25,7 @@ interface IBlogData {
   };
 }
 
-interface IPaginationMeta {
+interface IPaginationData {
   page: number;
   limit: number;
   totalItems: number;
@@ -36,18 +36,29 @@ const HomePage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [blogs, setBlogs] = useState<IBlogData[]>();
 
-  const fetchBlogs = async () => {
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    totalItems: 0,
+  });
+
+  const fetchBlogs = async (pageNumb: number) => {
     try {
-      const response = await blogService.getRequest("/blog");
+      const response = await blogService.getRequest(
+        `/blog/?page=${pageNumb}&limit=5`
+      );
       setBlogs(response.data);
+      setPagination(response.options);
+      console.log(response.options);
     } catch (exception) {
       toast.error("Error fetching blogs");
     }
   };
 
   useEffect(() => {
-    fetchBlogs();
-  }, []);
+    console.log("useEffect triggered, page: ", page);
+    fetchBlogs(page);
+  }, [page]);
 
   if (blogs) {
     return (
@@ -68,7 +79,6 @@ const HomePage = () => {
           ) : (
             <></>
           )}
-
           <div
             // className={`bg-yellow-30 grid grid-cols-1 xl:grid-cols-2 gap-x-10 gap-y-5 `}
             className={`flex flex-col gap-5 `}
@@ -79,7 +89,7 @@ const HomePage = () => {
                 <NavLink
                   key={blog._id}
                   to={`/blog/${blog.slug}`}
-                  className="flex flex-col p-5 shadow-2xl rounded-2xl  bg-gray-100 w-2xl mx-auto h-75 justify-between"
+                  className="flex flex-col p-5 shadow-2xl rounded-2xl  bg-gray-100 w-2xl mx-auto h- justify-between"
                 >
                   {/* title and body */}
                   <div>
@@ -103,6 +113,41 @@ const HomePage = () => {
                 </NavLink>
               );
             })}
+          </div>
+
+          {/* Pagination UI */}
+          <div className="flex gap-2 mt-4 w-2xl mx-auto justify-center">
+            <button
+              className="cursor-pointer hover:text-gray-500"
+              disabled={page === 1}
+              onClick={() => setPage((prev) => prev - 1)}
+            >
+              Prev
+            </button>
+
+            {[...Array(pagination.totalPages)].map((_, i) => (
+              <button
+                key={i}
+                className={page == i + 1 ? "font-bold" : ""}
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              className={` ${
+                page == pagination.totalPages
+                  ? ""
+                  : "hover:text-gray-500 cursor-pointer"
+              }`}
+              disabled={page === pagination.totalPages}
+              onClick={() => {
+                setPage((prev) => prev + 1);
+              }}
+            >
+              Next
+            </button>
           </div>
         </div>
       </>
