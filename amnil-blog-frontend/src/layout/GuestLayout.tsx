@@ -21,7 +21,7 @@ function GuestLayout() {
   }
   return (
     <>
-      <div className="min-h-screen bg-red-40 ">
+      <div className="min-h-screen bg-indigo-50 ">
         {/* nav */}
         <Navbar />
         {/* main body */}

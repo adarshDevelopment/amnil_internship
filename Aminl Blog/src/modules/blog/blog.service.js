@@ -49,7 +49,6 @@ class BlogService extends BaseService {
         .populate("user", ["_id", "email", "name"])
         .populate("tag", ["_id", "title"])
         .sort({ createdAt: sortBy });
-      console.log("data from service: ", data);
       // fetching total count
       const totalCount = await this.model.countDocuments(filter);
 
@@ -69,12 +68,7 @@ class BlogService extends BaseService {
   transformBlogUpdate = async (req, blog) => {
     // check if it is the same user
     const data = req.body;
-    console.log(
-      "logged In user: ",
-      req.loggedInUserId,
-      " | blgo id: ",
-      blog.user
-    );
+
     if (blog.user._id.toString() !== req.loggedInUserId) {
       throw {
         message: "You are not authorized to make changes to this blog.",
@@ -94,5 +88,7 @@ class BlogService extends BaseService {
     // return data
     return data;
   };
+
+  
 }
 module.exports = new BlogService(BlogModel);

@@ -9,22 +9,24 @@ import RegsiterPage from "../../pages/RegisterPage";
 
 import ProtectedRoutes from "./ProtectedRoutes.routes";
 import OpenRoutes from "./OpenRoutes.routes";
+import ProfilePage from "../../pages/ProfilePage";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <GuestLayout />,
     children: [
-      { index: true, element: <HomePage/> },
-      { path: "/blog/:slug", element: <BlogPage/> },
-      { path: "/blog/edit/:slug", element: <EditBlogPage/> },
+      { index: true, element: <HomePage /> },
+      { path: "/blog/:slug", element: <BlogPage /> },
       {
         element: <ProtectedRoutes />,
         children: [
           {
             path: "/blog/create",
-            element: <CreateBlogPage/>,
+            element: <CreateBlogPage />,
           },
+          { path: "/blog/edit/:slug", element: <EditBlogPage /> },
+          { path: "/proflie", element: <ProfilePage /> },
         ],
       },
     ],

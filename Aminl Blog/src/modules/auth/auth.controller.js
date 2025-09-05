@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const jsonwebtoken = require("jsonwebtoken");
 const { AppConfig } = require("../../config/config");
 const { generateRandomString } = require("../../util/helper");
+const blogService = require("../blog/blog.service");
 
 class AuthController {
   register = async (req, res, next) => {
@@ -96,6 +97,22 @@ class AuthController {
       next(exception);
     }
   };
+
+  getProfileBlogs = async(req, res, next)=>{
+     try {
+          console.log('req user: ',  req.loggedInUserId)
+          const yourBlogs = await blogService.fetchMultipleRowsByFilter({user: req.loggedInUserId});
+          console.log('yourBLogs: ', yourBlogs);
+          res.json({
+            message: "Your blogs successfully fetched",
+            status: "success",
+            data: yourBlogs,
+            options: null,
+          });
+        } catch (exception) {
+          next(exception);
+        }
+  }
 }
 
 module.exports = new AuthController();

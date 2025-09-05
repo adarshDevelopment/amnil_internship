@@ -44,7 +44,6 @@ const auth = async (req, res, next) => {
     // call the next middleware
     next();
   } catch (exception) {
-    console.log("exception: ", exception);
     next(exception);
   }
 };

@@ -85,8 +85,9 @@ class CommentController {
     try {
       const commentId = req.params.id;
       // make necessary changes to the payload
+      console.log('in here');
       const data = await commentService.transformUpdateBlog(req);
-      // console.log('data: ', data);
+      console.log('data: ', data);
       // call the update function from the baseservice
       const updatedComment = await commentService.updateSingleRowByFilter(
         { _id: commentId },

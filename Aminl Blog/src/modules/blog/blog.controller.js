@@ -1,3 +1,4 @@
+const { current } = require("@reduxjs/toolkit");
 const commentService = require("../comment/comment.service");
 const blogService = require("./blog.service");
 
@@ -47,7 +48,7 @@ class BlogController {
         data,
         options: {
           pagination: {
-            currentPage,
+            page: currentPage,
             limit,
             totalPages,
             totalItems: totalCount,
@@ -169,6 +170,40 @@ class BlogController {
       next(exception);
     }
   };
+
+  fetchByUser = async () => {
+    try {
+      const userId = req.params.user;
+      const blogs = await blogService.fetchMultipleRowsByFilter({
+        user: userId,
+      });
+      res.json({
+        message: "Blogs fetched succesfully by user",
+        status: "success",
+        data: blogs,
+        options: null,
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
+  fetchYourBlogs = async () => {
+    try {
+      console.log('in here');
+      const yourBlogs = await blogService.fetchMultipleRowsByFilter({user: req.loggedInUserId});
+      console.log('yourBLogs: ', yourBlogs);
+      res.json({
+        message: "Your blogs successfully fetched",
+        status: "success",
+        data: yourBlogs,
+        options: null,
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
 }
 
 module.exports = new BlogController();
+

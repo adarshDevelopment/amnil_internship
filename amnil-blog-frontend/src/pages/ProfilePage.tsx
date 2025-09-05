@@ -25,20 +25,13 @@ interface IBlogData {
   };
 }
 
-interface IPaginationMeta {
-  page: number;
-  limit: number;
-  totalItems: number;
-  totalPages: number;
-}
-
-const HomePage = () => {
+const ProfilePage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [blogs, setBlogs] = useState<IBlogData[]>();
 
-  const fetchBlogs = async () => {
+  const fetchProfileBlogs = async () => {
     try {
-      const response = await blogService.getRequest("/blog");
+      const response = await blogService.getRequest("/auth/showProfileBlogs");
       setBlogs(response.data);
     } catch (exception) {
       toast.error("Error fetching blogs");
@@ -46,13 +39,17 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-    fetchBlogs();
+    fetchProfileBlogs();
   }, []);
 
   if (blogs) {
     return (
       <>
-        <div className="flex flex-col gap-4 ">
+        <div className="w-2xl mx-auto text-gray-500 font-semibold  text-3xl">
+          Your Blogs
+        </div>
+
+        <div className="flex flex-col gap-4">
           {user ? (
             <div>
               <NavLink
@@ -110,4 +107,4 @@ const HomePage = () => {
   }
 };
 
-export default HomePage;
+export default ProfilePage;

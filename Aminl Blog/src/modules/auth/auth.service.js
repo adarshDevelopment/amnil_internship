@@ -26,7 +26,6 @@ class AuthService extends BaseServiceController {
         name: data.name,
       };
     } catch (exception) {
-      console.log("exception: ", exception);
       throw exception;
     }
   };

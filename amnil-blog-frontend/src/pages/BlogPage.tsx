@@ -35,12 +35,10 @@ const BlogPage = () => {
     try {
       const response = await blogService.getRequest(`/blog/${slug}`);
       setBlog(response.data);
-      console.log("response: ", response.data);
     } catch (exception) {
       toast.error("Error fetching blog");
     }
   };
-  console.log("user selector: ", user);
 
   const deleteBlog = async () => {
     const answer = window.confirm("Are you sure you want to delete this blog?");
@@ -48,6 +46,7 @@ const BlogPage = () => {
       if (answer) {
         await blogService.deleteRequest(`/blog/${blog?.slug}`);
       }
+      toast.success("Blog successfully deleted");
       navigate("/");
     } catch (exception) {
       toast.error("Error deleting blog");
@@ -71,14 +70,14 @@ const BlogPage = () => {
           </NavLink>
         </div>
 
-        <div className="bg-pink-40 text-gray-600 flex flex-col gap-1">
+        <div className="bg-pink-40 text-gray-600 flex flex-col gap-1 bg-red-40 w-3xl mx-auto">
           {/* title and options */}
           <div className=" flex justify-between items-end">
             <span className="text-lg font-semibold">{blog?.title}</span>
             {user?.id === blog.user._id ? (
               <div className="flex justify-end gap-3">
                 <NavLink
-                  to={"/blog/edit/:uniqueSlug"}
+                  to={`/blog/edit/${slug}`}
                   className={
                     "bg-yellow-500 hover:bg-yellow-600 px-2 py-1 rounded-md text-white font-semibold flex items-center gap-1"
                   }
@@ -89,7 +88,7 @@ const BlogPage = () => {
                   Edit
                 </NavLink>
 
-              <button
+                <button
                   onClick={deleteBlog}
                   className="flex items-center bg-red-400 hover:bg-red-500 cursor-pointer rounded-md px-2 py-1 text-white font-semibold"
                 >

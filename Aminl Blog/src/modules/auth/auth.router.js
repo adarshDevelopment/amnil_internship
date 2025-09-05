@@ -7,4 +7,5 @@ const auth = require("../../middlewares/auth.middleware");
 router.post("/register", requestValidator(RegisterDTO), authController.register);
 router.post("/login", requestValidator(LoginDTO), authController.login);
 router.get("/me", auth, authController.showOwnProfile)
+router.get('/showProfileBlogs',auth, authController.getProfileBlogs );
 module.exports = router;

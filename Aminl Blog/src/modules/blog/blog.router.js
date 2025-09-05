@@ -15,4 +15,5 @@ router
   .delete(auth, blogController.destroy);
 router.get("/list-comments/:id", blogController.listAllComments);
 
+router.get("/:user", blogController.fetchByUser);
 module.exports = router;

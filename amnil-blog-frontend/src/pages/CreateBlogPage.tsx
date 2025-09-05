@@ -52,8 +52,8 @@ const CreateBlogPage = () => {
   }, []);
   return (
     <>
-      <div className="flex bg-pink-3 flex-col gap-4">
-        <div>
+      <div className="flex bg-pink-3 flex-col gap-4 w-3xl mx-auto">
+        {/* <div>
           <NavLink
             to="/"
             className={
@@ -63,7 +63,7 @@ const CreateBlogPage = () => {
             <GoHome />
             <span>Home Page</span>
           </NavLink>
-        </div>
+        </div> */}
 
         <form
           onSubmit={handleSubmit(submitBlog)}
@@ -75,7 +75,7 @@ const CreateBlogPage = () => {
             <input
               required
               {...register("title")}
-              className="border border-gray-500 w-[40%] focus:outline-none py-1 px-2"
+              className="border border-gray-500 w-full focus:outline-none py-1 px-2"
               placeholder="TItle"
             />
             <span className="text-sm text-red-600">
@@ -89,7 +89,7 @@ const CreateBlogPage = () => {
             <select
               required
               {...register("tag")}
-              className="border border-gray-500 w-[40%] focus:outline-none py-1 px-2"
+              className="border border-gray-500  focus:outline-none py-1 px-2"
             >
               <option value={""}>Select a tag</option>
               {tags?.map((tag) => {
@@ -109,7 +109,7 @@ const CreateBlogPage = () => {
 
             <input
               {...register("subtitle")}
-              className="border border-gray-500 w-[60%] focus:outline-none py-1 px-2"
+              className="border border-gray-500` focus:outline-none py-1 px-2"
               placeholder="Subtitle"
             />
             <span className="text-sm text-red-600">
@@ -122,7 +122,7 @@ const CreateBlogPage = () => {
 
             <textarea
               {...register("body", { required: "Body is required" })}
-              className="border border-gray-500 w-[100%] h-50 focus:outline-none py-1 px-2"
+              className="border border-gray-500 w-[100%] h-100 focus:outline-none py-1 px-2"
             />
             <span className="text-sm text-red-600">{errors.body?.message}</span>
           </div>
@@ -130,7 +130,7 @@ const CreateBlogPage = () => {
           <div>
             <button
               type="submit"
-              className="px-3 py-2 bg-blue-500 text-white rounded-md cursor-pointer hover:bg-blue-600 font-semibold"
+              className="px-3 py-2 w-full bg-blue-500 text-white rounded-md cursor-pointer hover:bg-blue-600 font-semibold"
             >
               Submit
             </button>
