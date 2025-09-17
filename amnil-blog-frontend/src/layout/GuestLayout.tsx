@@ -21,7 +21,7 @@ function GuestLayout() {
   }
   return (
     <>
-      <div className="min-h-screen bg-indigo-50 ">
+      <div className="min-h-[calc(100vh-4rem)] bg-indigo-50 ">
         {/* nav */}
         <Navbar />
         {/* main body */}
@@ -29,7 +29,7 @@ function GuestLayout() {
           <Outlet />
         </div>
       </div>
-      <Toaster richColors closeButton />
+      <Toaster richColors closeButton position="top-right" />
     </>
   );
 }

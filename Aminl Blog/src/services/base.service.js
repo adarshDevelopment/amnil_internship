@@ -37,6 +37,10 @@ class BaseService {
       throw exception;
     }
   };
+
+  udpateSingleRowByFilter = async (filter, data)=>{
+    return await this.model.findOneAndUpdate(filter, data, {new: true});
+  }
 }
 
 module.exports = BaseService;

@@ -7,12 +7,20 @@ const requestValidator = require("../../middlewares/requestValidator.middleware"
 router
   .route("/")
   .get(blogController.index)
-  .post(auth, requestValidator(CreateBlogDto), blogController.store);
+  .post(
+    auth(["user", "admin"]),
+    requestValidator(CreateBlogDto),
+    blogController.store
+  );
 router
   .route("/:slug")
   .get(blogController.show)
-  .put(auth, requestValidator(UpdateBlogDTO), blogController.update)
-  .delete(auth, blogController.destroy);
+  .put(
+    auth(["user", "admin"]),
+    requestValidator(UpdateBlogDTO),
+    blogController.update
+  )
+  .delete(auth(["user", "admin"]), blogController.destroy);
 router.get("/list-comments/:id", blogController.listAllComments);
 
 router.get("/:user", blogController.fetchByUser);

@@ -4,9 +4,9 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import blogService from "../services/blog.service";
+import blogService from "../../services/blog.service";
 import { useSelector } from "react-redux";
-import type { RootState } from "../redux/store";
+import type { RootState } from "../../redux/store";
 
 interface IBlogData {
   _id: string;
@@ -69,24 +69,28 @@ const BlogPage = () => {
             <span>Home Page</span>
           </NavLink>
         </div>
-
+        user: {user?.name}
         <div className="bg-pink-40 text-gray-600 flex flex-col gap-1 bg-red-40 w-3xl mx-auto">
           {/* title and options */}
           <div className=" flex justify-between items-end">
             <span className="text-lg font-semibold">{blog?.title}</span>
-            {user?.id === blog.user._id ? (
+            {user?._id === blog.user._id || user?.userType === "admin" ? (
               <div className="flex justify-end gap-3">
-                <NavLink
-                  to={`/blog/edit/${slug}`}
-                  className={
-                    "bg-yellow-500 hover:bg-yellow-600 px-2 py-1 rounded-md text-white font-semibold flex items-center gap-1"
-                  }
-                >
-                  <span>
-                    <IoSettingsOutline />
-                  </span>
-                  Edit
-                </NavLink>
+                {user?._id=== blog.user._id ? (
+                  <NavLink
+                    to={`/blog/edit/${slug}`}
+                    className={
+                      "bg-yellow-500 hover:bg-yellow-600 px-2 py-1 rounded-md text-white font-semibold flex items-center gap-1"
+                    }
+                  >
+                    <span>
+                      <IoSettingsOutline />
+                    </span>
+                    Edit
+                  </NavLink>
+                ) : (
+                  <></>
+                )}
 
                 <button
                   onClick={deleteBlog}
@@ -101,9 +105,12 @@ const BlogPage = () => {
           </div>
           {/* tag and author */}
           <div className="flex items-center gap-3">
-            <div className="text-sm rounded-lg bg-green-500 w-fit px-2 py-1 font-semibold text-white">
+            <NavLink
+              to={`/tag/${blog.tag.title}`}
+              className="text-sm rounded-lg bg-green-500 w-fit px-2 py-1 font-semibold text-white"
+            >
               {blog.tag.title}
-            </div>
+            </NavLink>
             <div className="font-semibold underline">{blog?.user.name}</div>
           </div>
 

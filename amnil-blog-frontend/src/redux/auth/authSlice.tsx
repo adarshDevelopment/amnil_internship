@@ -4,9 +4,10 @@ import authService from "../../services/auth.service";
 interface IInitialState {
   token: string | null;
   user: {
-    id: string;
+    _id: string;
     name: string;
     email: string;
+    userType: string
   } | null;
   status: "idle" | "loading" | "succeeded" | "failed";
 }
@@ -18,7 +19,9 @@ const initialState: IInitialState = {
 };
 
 export const fetchUser = createAsyncThunk("User/fetchUser", async () => {
-  return await authService.getRequest("auth/me");
+  const response =  await authService.getRequest("auth/me");
+  return response;
+  console.log('response: ', response);
 });
 
 const authSlice = createSlice({
@@ -40,7 +43,7 @@ const authSlice = createSlice({
       state.status = "loading";
     });
     builder.addCase(fetchUser.fulfilled, (state, action) => {
-      state.user = action.payload.data.user;
+      state.user = action.payload.data;
       state.status = "succeeded";
     });
     builder.addCase(fetchUser.rejected, (state, action) => {

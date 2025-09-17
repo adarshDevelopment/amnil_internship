@@ -3,7 +3,8 @@ const joi = require('joi');
 const RegisterDTO = joi.object({
   name: joi.string().min(2).max(75),
   email: joi.string().email().required(),
-  password: joi.string().min(8).required()
+  password: joi.string().min(8).required(),
+  isAdmin: joi.boolean().default(false)
 })
 
 const LoginDTO= joi.object({

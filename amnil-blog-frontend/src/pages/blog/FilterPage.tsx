@@ -1,11 +1,11 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { CiCirclePlus } from "react-icons/ci";
 import { FiPlus } from "react-icons/fi";
-import type { RootState } from "../redux/store";
+import type { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import blogService from "../services/blog.service";
+import blogService from "../../services/blog.service";
 import { IoIosAddCircleOutline } from "react-icons/io";
 
 interface IBlogData {
@@ -25,31 +25,47 @@ interface IBlogData {
   };
 }
 
-const ProfilePage = () => {
+interface IPaginationData {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+const FilterPage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [blogs, setBlogs] = useState<IBlogData[]>();
+  const { tag } = useParams();
 
-  const fetchProfileBlogs = async () => {
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    totalItems: 0,
+  });
+
+  const fetchBlogs = async (pageNumb: number) => {
     try {
-      const response = await blogService.getRequest("/auth/showProfileBlogs");
+      console.log('tag: ', tag);
+      const response = await blogService.getRequest(
+        `/tag/${tag}/?page=${pageNumb}&limit=5`
+      );
       setBlogs(response.data);
+      setPagination(response.options);
+      console.log(response.options);
     } catch (exception) {
       toast.error("Error fetching blogs");
     }
   };
 
   useEffect(() => {
-    fetchProfileBlogs();
-  }, []);
+    console.log("useEffect triggered, page: ", page);
+    fetchBlogs(page);
+  }, [page]);
 
   if (blogs) {
     return (
       <>
-        <div className="w-2xl mx-auto text-gray-500 font-semibold  text-3xl">
-          Your Blogs
-        </div>
-
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 ">
           {user ? (
             <div>
               <NavLink
@@ -65,7 +81,6 @@ const ProfilePage = () => {
           ) : (
             <></>
           )}
-
           <div
             // className={`bg-yellow-30 grid grid-cols-1 xl:grid-cols-2 gap-x-10 gap-y-5 `}
             className={`flex flex-col gap-5 `}
@@ -76,7 +91,7 @@ const ProfilePage = () => {
                 <NavLink
                   key={blog._id}
                   to={`/blog/${blog.slug}`}
-                  className="flex flex-col p-5 shadow-2xl rounded-2xl  bg-gray-100 w-2xl mx-auto h-75 justify-between"
+                  className="flex flex-col p-5 shadow-2xl rounded-2xl  bg-gray-100 w-2xl mx-auto h- justify-between"
                 >
                   {/* title and body */}
                   <div>
@@ -101,10 +116,47 @@ const ProfilePage = () => {
               );
             })}
           </div>
+
+          {/* Pagination UI */}
+          <div className="flex gap-2 mt-4 w-2xl mx-auto justify-center">
+            <button
+              className="cursor-pointer hover:text-gray-500"
+              disabled={page === 1}
+              onClick={() => setPage((prev) => prev - 1)}
+            >
+              Prev
+            </button>
+
+            {/* {[...Array(pagination.totalPages)].map((_, i) => (
+              <button
+                key={i}
+                className={page == i + 1 ? "font-bold" : ""}
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))} */}
+
+            <span>{page}</span>
+
+            <button
+              className={` ${
+                page == pagination.totalPages
+                  ? ""
+                  : "hover:text-gray-500 cursor-pointer"
+              }`}
+              disabled={page === pagination.totalPages}
+              onClick={() => {
+                setPage((prev) => prev + 1);
+              }}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </>
     );
   }
 };
 
-export default ProfilePage;
+export default FilterPage;

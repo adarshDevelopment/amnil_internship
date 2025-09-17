@@ -1,43 +1,47 @@
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
-import authService from "../services/auth.service";
-import { toast, Toaster } from "sonner";
-import { useDispatch } from "react-redux";
-import { setToken } from "../redux/auth/authSlice";
+import authService from "../../services/auth.service";
 import { IoHomeOutline } from "react-icons/io5";
-interface ILoginData {
+import { toast, Toaster } from "sonner";
+interface IRegisterData {
+  name: string;
   email: string;
   password: string;
+  isAdmin: boolean;
 }
-const LoginPage = () => {
+const RegsiterPage = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<ILoginData>({
+  } = useForm<IRegisterData>({
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      isAdmin: false,
     },
   });
+
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const submitLoginForm = async (data: ILoginData) => {
+  const registerForm = async (data: IRegisterData) => {
+    // alert("User registered");
     try {
-      const response = await authService.postRequest("auth/login", data);
-      // console.log('response: ', response);
-      localStorage.setItem("amnilBlogToken", response.data.accessToken);
-      dispatch(setToken(response.data.accessToken));
-      navigate("/");
-      toast.success("User successfully logged in");
-      // navigate to home page
+      await authService.postRequest("auth/register", data);
+      toast.success('User successfully created. Please log in');
+      navigate("/login");
     } catch (exception: any) {
-      console.log("exception: ", exception);
-      Object.keys(exception.error).map((ex) => {
-        setError(ex as keyof ILoginData, { message: exception.error[ex] });
-      });
-      // toast.error(exception.message);
+      if (exception.error) {
+        Object.keys(exception.error).map((ex) => {
+          setError(ex as keyof IRegisterData, { message: exception.error[ex] });
+        });
+        return;
+      }
+      toast.error("Something went wrong");
+      if (exception.message) {
+        // setError("email", { message: exception.message });
+      }
     }
   };
   return (
@@ -54,9 +58,20 @@ const LoginPage = () => {
           </div>
 
           <form
-            onSubmit={handleSubmit(submitLoginForm)}
+            onSubmit={handleSubmit(registerForm)}
             className="flex flex-col gap-3"
           >
+            {/* name */}
+            <div className="flex flex-col">
+              <span>Name</span>
+              <input
+                type="text"
+                {...register("name")}
+                className="border border-gray-300 focus:outline-none py-1 px-2"
+              />
+              <div className="text-sm text-red-600">{errors.name?.message}</div>
+            </div>
+
             {/* email */}
             <div className="flex flex-col">
               <span>Email</span>
@@ -82,24 +97,36 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <div className="flex gap-2 mx-auto flex-col w-full">
+            <div className="flex items-center gap-4">
+              <span>Is Admin?</span>
+              <input
+                type="checkbox"
+                {...register("isAdmin")}
+                className="border border-gray-300 focus:outline-none py-1 px-2"
+              />
+              <div className="text-sm text-red-600">
+                {errors.password?.message}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-start mx-auto gap-3 w-full flex-col">
               <button className="bg-blue-400 w-full mx-auto hover:bg-blue-500 cursor-pointer font-semibold text-white px-2 py-1 rounded-md">
-                Log in
+                Register
               </button>
 
               <NavLink
-                to={"/register"}
-                className="bg-green-500 w-full text-center mx-auto hover:bg-green-600 cursor-pointer font-semibold text-white px-2 py-1 rounded-md"
+                to={"/login"}
+                className="bg-green-500 w-full mx-auto hover:bg-green-600 text-center cursor-pointer font-semibold text-white px-2 py-1 rounded-md"
               >
-                Register new User
+                Already a member
               </NavLink>
             </div>
           </form>
         </div>
       </div>
-      <Toaster richColors closeButton />
+      <Toaster richColors closeButton position="top-right"/>
     </>
   );
 };
 
-export default LoginPage;
+export default RegsiterPage;

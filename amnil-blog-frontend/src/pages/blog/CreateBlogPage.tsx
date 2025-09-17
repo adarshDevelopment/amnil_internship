@@ -1,8 +1,6 @@
 import { useForm } from "react-hook-form";
-import { NavLink } from "react-router-dom";
-import { GoHome } from "react-icons/go";
-import axiosInstance from "../config/axios.config";
-import blogService from "../services/blog.service";
+import { NavLink, useNavigate } from "react-router-dom";
+import blogService from "../../services/blog.service";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 
@@ -34,11 +32,15 @@ const CreateBlogPage = () => {
     },
   });
   const [tags, setTags] = useState<ITagData[]>();
+  const navigate = useNavigate();
 
   const submitBlog = async (data: IBlogData) => {
     try {
       const response = await blogService.postRequest("/blog", data);
       toast.success("blog successfully posted");
+      console.log('response: ', response);
+      const slug = response.data.slug;
+      navigate(`/blog/${slug}`)
     } catch (exception) {
       toast.error("error posting blog");
     }

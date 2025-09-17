@@ -1,3 +1,4 @@
+const blogService = require("../blog/blog.service");
 const tagService = require("./tag.service");
 
 class TagController {
@@ -42,14 +43,14 @@ class TagController {
     }
   };
 
-  // function to verify if the record exists in the collection
+  // function to  if the record exists in the collection
   udpate = async (req, res, next) => {
     try {
       const _id = req.params.id;
       const data = req.body;
 
       // fetch tag and see if it exists
-      const tag = await tagService.verifyData(_id)
+      const tag = await tagService.verifyData(_id);
       // update using update function in the Base service class
       const updatedTag = await tagService.updateSingleRowByFilter(
         { _id },
@@ -71,7 +72,7 @@ class TagController {
     try {
       const _id = req.params.id;
       // fetch tag, and if not found, throw exception
-      const tag = await tagService.verifyData(_id)
+      const tag = await tagService.verifyData(_id);
       // delete the record through the tag instance
       await tag.deleteOne();
       res.status(201).json({
@@ -88,12 +89,38 @@ class TagController {
   show = async (req, res, next) => {
     try {
       const id = req.params.id;
-      const tag = await tagService.verifyData(id)
+      const tag = await tagService.verifyData(id);
       res.status(200).json({
         message: "tag successfully fetched",
         success: "Success",
         data: tag,
         options: null,
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
+  getBlogsByTag = async (req, res, next) => {
+    try {
+      console.log('inside getblogs by tag');
+      const title = req.params.tag;
+      console.log('title: ', title)
+      const tag = await tagService.fetchSingleRowByFilter({ title });
+      if (!tag) {
+        throw {
+          message: "Tag not found",
+          code: 404,
+        };
+      }
+      const { data, pagination } = await blogService.listAllBlogs({
+        tag: tag._id,
+      });
+      res.json({
+        message: "Blogs by tag successfully fetched",
+        status: "Success",
+        data,
+        pagination,
       });
     } catch (exception) {
       next(exception);

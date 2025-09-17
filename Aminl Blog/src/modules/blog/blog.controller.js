@@ -1,6 +1,7 @@
 const { current } = require("@reduxjs/toolkit");
 const commentService = require("../comment/comment.service");
 const blogService = require("./blog.service");
+const { UserType } = require("../../util/constants");
 
 class BlogController {
   store = async (req, res, next) => {
@@ -39,21 +40,16 @@ class BlogController {
       */
 
       //  fetch required data from the service function
-      const { data, currentPage, limit, totalPages, totalCount } =
-        await blogService.listAllBlogs(filter, req.query);
+      const { data, pagination } = await blogService.listAllBlogs(
+        filter,
+        req.query
+      );
 
       res.status(200).json({
         message: "Blogs successfully fetched",
         status: "Success",
         data,
-        options: {
-          pagination: {
-            page: currentPage,
-            limit,
-            totalPages,
-            totalItems: totalCount,
-          },
-        },
+        options: { pagination },
       });
     } catch (exception) {
       next(exception);
@@ -64,7 +60,7 @@ class BlogController {
     try {
       const data = await blogService.model
         .findOne({ slug: slug })
-        .populate("user", ["_id", "email", "name"])
+        .populate("user", ["_id", "email", "name", "userType"])
         .populate("tag", ["_id", "title"]);
       if (!data) {
         throw {
@@ -130,14 +126,16 @@ class BlogController {
       const blog = await this.verifyBlog(slug);
 
       // check if the blog was created by the logged In User
-      // console.log('blog user id:', blog);
-      if (blog.user._id.toString() !== req.loggedInUserId) {
-        throw {
+      // or if the user is admin
+      const isOwner = blog.user._id.toString() === req.loggedInUserId ;
+      const isAdmin = req.loggedInUser.userType === UserType.admin;
+      console.log('blog: ', blog);
+      if(!(isOwner || isAdmin)){
+       throw {
           message: "Unauthorized. You cannot delete this blog",
           code: 401,
         };
       }
-
       // call the delete function on the blog instance
       await blog.deleteOne();
       res.status(201).json({
@@ -190,9 +188,11 @@ class BlogController {
 
   fetchYourBlogs = async () => {
     try {
-      console.log('in here');
-      const yourBlogs = await blogService.fetchMultipleRowsByFilter({user: req.loggedInUserId});
-      console.log('yourBLogs: ', yourBlogs);
+      console.log("in here");
+      const yourBlogs = await blogService.fetchMultipleRowsByFilter({
+        user: req.loggedInUserId,
+      });
+      console.log("yourBLogs: ", yourBlogs);
       res.json({
         message: "Your blogs successfully fetched",
         status: "success",
@@ -206,4 +206,3 @@ class BlogController {
 }
 
 module.exports = new BlogController();
-

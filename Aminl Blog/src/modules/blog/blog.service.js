@@ -3,6 +3,7 @@ const BaseService = require("../../services/base.service");
 const tagService = require("../tag/tag.service");
 const BlogModel = require("./blog.model");
 const { generateRandomString } = require("../../util/helper");
+const { current } = require("@reduxjs/toolkit");
 
 class BlogService extends BaseService {
   transformBlogCreate = async (req) => {
@@ -37,10 +38,11 @@ class BlogService extends BaseService {
   listAllBlogs = async (filter, query) => {
     try {
       // setting up pagination data
-      const currentPage = query.page || 1;
-      const limit = query.limit || 10;
+      const currentPage = +query.page || 1;
+      const limit = +query.limit || 10;
       const skip = (currentPage - 1) * limit;
 
+      // console.log('filter: ', filter);
       const sortBy = query.sort === "desc" ? -1 : query.sort === "asc" ? 1 : -1;
       const data = await this.model
         .find(filter)
@@ -54,10 +56,12 @@ class BlogService extends BaseService {
 
       return {
         data,
-        currentPage,
-        limit,
-        totalCount,
-        totalPages: Math.ceil(totalCount / limit), // round off the total value to find the total number of pages
+        pagination: {
+          page: currentPage,
+          limit,
+          totalCount,
+          totalPages: Math.ceil(totalCount / limit), // round off the total value to find the total number of pages
+        },
       };
     } catch (exception) {
       throw exception;
@@ -88,7 +92,5 @@ class BlogService extends BaseService {
     // return data
     return data;
   };
-
-  
 }
 module.exports = new BlogService(BlogModel);

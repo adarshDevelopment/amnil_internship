@@ -1,15 +1,22 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import GuestLayout from "../../layout/GuestLayout";
 import HomePage from "../../pages/HomePage";
-import CreateBlogPage from "../../pages/CreateBlogPage";
-import BlogPage from "../../pages/BlogPage";
-import EditBlogPage from "../../pages/EditBlogtPage";
-import LoginPage from "../../pages/LoginPage";
-import RegsiterPage from "../../pages/RegisterPage";
+import CreateBlogPage from "../../pages/blog/CreateBlogPage";
+import BlogPage from "../../pages/blog/BlogPage";
+import EditBlogPage from "../../pages/blog/EditBlogtPage";
+import LoginPage from "../../pages/auth/LoginPage";
+import RegsiterPage from "../../pages/auth/RegisterPage";
 
 import ProtectedRoutes from "./ProtectedRoutes.routes";
 import OpenRoutes from "./OpenRoutes.routes";
-import ProfilePage from "../../pages/ProfilePage";
+import ProfilePage from "../../pages/auth/ProfilePage";
+import FilterPage from "../../pages/blog/FilterPage";
+import ProfileBlogPage from "../../pages/auth/profilepages/ProfileBlogPage";
+import TagIndex from "../../pages/tag/TagIndex";
+import ProfileSettings from "../../pages/auth/profilepages/ProfileSettings";
+import AdminRoutes from "./AdminRoutes.routes";
+import ForgetPassword from "../../pages/auth/ForgetPassword";
+import ResetPassword from "../../pages/auth/ResetPassword";
 
 const router = createBrowserRouter([
   {
@@ -18,6 +25,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "/blog/:slug", element: <BlogPage /> },
+      // { path: "/user/:userId", element: <ProfileBlogPage /> },
       {
         element: <ProtectedRoutes />,
         children: [
@@ -26,7 +34,25 @@ const router = createBrowserRouter([
             element: <CreateBlogPage />,
           },
           { path: "/blog/edit/:slug", element: <EditBlogPage /> },
-          { path: "/proflie", element: <ProfilePage /> },
+          { path: "/tag/:tag", element: <FilterPage /> },
+        ],
+      },
+
+      {
+        path: "/user/:userId",
+        element: <ProfilePage />,
+        children: [
+          { path: "blogs", element: <ProfileBlogPage /> },
+          {
+            path: "tag",
+            element: <AdminRoutes />,
+            children: [{ index: true, element: <TagIndex /> }],
+          },
+          {
+            path: "settings",
+            element: <ProtectedRoutes />,
+            children: [{ index: true, element: <ProfileSettings /> }],
+          },
         ],
       },
     ],
@@ -37,6 +63,8 @@ const router = createBrowserRouter([
     children: [
       { path: "/login", Component: LoginPage },
       { path: "/register", Component: RegsiterPage },
+      { path: "/forget-password", element: <ForgetPassword /> },
+      { path: "/reset-password/:token", element: <ResetPassword /> },
     ],
   },
 ]);

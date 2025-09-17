@@ -1,8 +1,9 @@
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import blogService from "../services/blog.service";
+import blogService from "../../services/blog.service";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import type{ ISuccessResponse } from "../../services/base.service";
 
 interface IBlogData {
   _id: string;

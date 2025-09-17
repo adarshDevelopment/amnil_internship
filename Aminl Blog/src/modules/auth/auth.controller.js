@@ -12,8 +12,9 @@ class AuthController {
     try {
       // hash password and check for duplicate emails before inserting
       const data = await authService.transformRegisterData(req);
+      console.log("data: ", data);
       const response = await authService.createUser(data);
-    
+      console.log("in here");
 
       res.status(201).json({
         message: "User successfully registered",
@@ -22,8 +23,8 @@ class AuthController {
         status: "Success",
       });
     } catch (exception) {
+      console.log("exception: ", exception);
       // all exceptions get sent to the final middleware from where necessary details get sent back to the user
-
       next(exception);
     }
   };
@@ -81,15 +82,15 @@ class AuthController {
 
   showOwnProfile = async (req, res, next) => {
     try {
-      const user = await authService.fetchLoggedInUser({
-        _id: req.loggedInUserId,
-      });
-
+      const user = req.loggedInUser;
       res.json({
         message: "User successfully fetched",
         status: "Success",
         data: {
-          user: { id: user.id, name: user.name, email: user.email },
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          userType: user.userType,
         },
         options: null,
       });
@@ -98,21 +99,153 @@ class AuthController {
     }
   };
 
-  getProfileBlogs = async(req, res, next)=>{
-     try {
-          console.log('req user: ',  req.loggedInUserId)
-          const yourBlogs = await blogService.fetchMultipleRowsByFilter({user: req.loggedInUserId});
-          console.log('yourBLogs: ', yourBlogs);
-          res.json({
-            message: "Your blogs successfully fetched",
-            status: "success",
-            data: yourBlogs,
-            options: null,
-          });
-        } catch (exception) {
-          next(exception);
-        }
-  }
+  getProfileBlogs = async (req, res, next) => {
+    try {
+      const userId = req.params.userId;
+      const user = await userService.fetchSingleRowByFilter({ _id: userId });
+      if (!user) {
+        throw {
+          message: "User not found",
+          code: 404,
+        };
+      }
+
+      const yourBlogs = await blogService.fetchMultipleRowsByFilter({
+        user: userId,
+      });
+      console.log("yourBLogs: ", yourBlogs);
+      res.json({
+        message: "Your blogs successfully fetched",
+        status: "success",
+        data: yourBlogs,
+        options: { user },
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
+  updateOwnProfile = async (req, res, next) => {
+    try {
+      const data = req.body;
+
+      const updatedProfile = await userService.updateSingleRowByFilter(
+        { _id: data._id },
+        data
+      );
+
+      res.json({
+        message: "Profile successfully updated",
+        status: "success",
+        data: updatedProfile,
+        options: null,
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
+  forgetPassword = async (req, res, next) => {
+    try {
+      // fetch user detail from user model
+      const email = req.body.email;
+      // send appropriate message
+      const user = await userService.fetchSingleRowByFilter({ email });
+      if (!user) {
+        throw {
+          message: "User not found. Invalid Email",
+          code: 404,
+        };
+      }
+
+      // generate and update token and send mail
+      await authService.sendPasswordResetEmail(user);
+
+      res.json({
+        message: "Password reset link sent",
+        data: null,
+        status: "Success",
+        options: null,
+      });
+
+      // send the token in an email to the user
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
+  resetPassword = async (req, res, next) => {
+    try {
+      const { password } = req.body;
+      const token = req.params.token;
+      console.log("token: ", token);
+      // fetch user detail
+      const userDetail = await userService.fetchSingleRowByFilter({
+        forgetPasswordToken: token,
+      });
+      if (!userDetail) {
+        throw {
+          message: "Invalid Token",
+          code: 422,
+        };
+      }
+      const duplciatePassword = bcrypt.compareSync(
+        password,
+        userDetail.password
+      );
+
+      if (duplciatePassword) {
+        throw {
+          message: "You cannot set your old password as your password",
+          detail: {
+            password: "You cannot set your old password as your password",
+          },
+          code: 422,
+        };
+      }
+
+      const newPassword = bcrypt.hashSync(password, 12);
+
+      userDetail.password = newPassword;
+      await userDetail.save();
+      res.json({
+        message: "Password successfully changed",
+        status: "Success",
+        data: null,
+        options: null,
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
+  authenticateResetToken = async (req, res, next) => {
+    try {
+      const token = req.params.token;
+      const user = await userService.fetchSingleRowByFilter({
+        forgetPasswordToken: token,
+      });
+      if (!user) {
+        throw {
+          message: "Invalid Token",
+          code: 422,
+        };
+      }
+
+      res.json({
+        data: {
+          name: user.name,
+          email: user.email,
+          userType: user.userType,
+        },
+        options: null,
+        message: "Token authenticated",
+        status: "Success",
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
 }
 
 module.exports = new AuthController();

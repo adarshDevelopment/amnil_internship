@@ -3,9 +3,9 @@ import type { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 
 const ProtectedRoutes = () => {
-  const { user, isLoading } = useSelector((state: RootState) => state.auth);
+  const { user, status } = useSelector((state: RootState) => state.auth);
 
-  if (isLoading) {
+  if (status === 'loading') {
     return <></>;
   }
   if (!user) {
