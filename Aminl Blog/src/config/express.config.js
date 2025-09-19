@@ -1,7 +1,8 @@
 const express = require("express");
 const router = require("./router.config");
-const cors = require('cors');
+const cors = require("cors");
 require("./mongodb.config");
+const { deleteFile } = require("../util/helper");
 
 const app = express();
 app.use(
@@ -32,11 +33,20 @@ app.use((err, req, res, next) => {
   const detail = err.detail || null;
   const status = err.status || "Failed";
 
+  // delete files if exception occurs
+  if (req.file) {
+    deleteFile(req.file.path);
+  } else if (req.files) {
+    req.files.forEach((file) => {
+      deleteFile(file.path);
+    });
+  }
+
   res.status(500).json({
     message,
     error: detail,
     status,
-    code
+    code,
   });
 });
 

@@ -3,9 +3,9 @@ const userService = require("../user/user.service");
 const AuthModel = require("./auth.model");
 const bcrypt = require("bcrypt");
 const UserModel = require("../user/user.model");
-const { UserType } = require("../../util/constants");
+const { UserType, UserStatus } = require("../../util/constants");
 const { generateRandomString } = require("../../util/helper");
-const {FrontendUrl} = require('../../config/config');
+const { FrontendUrl } = require("../../config/config");
 const emailService = require("../../services/email.service");
 
 class AuthService extends BaseServiceController {
@@ -30,6 +30,7 @@ class AuthService extends BaseServiceController {
         password: hashedPassword,
         name: data.name,
         userType,
+        status: UserStatus.inactive
       };
     } catch (exception) {
       console.log("exception from auth service");
@@ -51,17 +52,18 @@ class AuthService extends BaseServiceController {
   };
 
   sendPasswordResetEmail = async (user) => {
-
     // generate tokens
     const forgetPasswordToken = generateRandomString(150);
     const forgetPasswordExpiry = new Date(Date.now() + 2 * 60 * 60 * 1000);
 
     // update user record
-    await userService.udpateSingleRowByFilter({_id: user._id}, {
-      forgetPasswordExpiry,
-      forgetPasswordToken
-    });
-
+    await userService.udpateSingleRowByFilter(
+      { _id: user._id },
+      {
+        forgetPasswordExpiry,
+        forgetPasswordToken,
+      }
+    );
 
     const html = `
   <div style="font-family: Arial, sans-serif; color: #333;">
@@ -99,6 +101,39 @@ class AuthService extends BaseServiceController {
       to: user.email,
       subject: "Password Reset email",
       html,
+    });
+  };
+
+  sendActivationEmail = async (user, token) => {
+    const html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+            <h2 style="color: #333;">Welcome!</h2>
+            <p style="font-size: 16px; color: #555;">
+              This is your email activation link. Please click the button below to activate your account:
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${FrontendUrl}/user-activation/${token}" 
+                style="background-color: #007BFF; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                Activate Account
+              </a>
+            </div>
+
+            <p style="font-size: 14px; color: #777;">
+              If the button above doesn’t work, copy and paste this link into your browser:
+            </p>
+            <p style="font-size: 14px; color: #007BFF; word-break: break-all;">
+              ${FrontendUrl}/user-activation/${token}
+            </p>
+
+            <p style="font-size: 14px; color: #aaa;">Thanks,<br/>The Team</p>
+          </div>
+        `;
+
+    await emailService.sendMail({
+      to: user.email,
+      subject: "User activation email",
+      html: html,
     });
   };
 }

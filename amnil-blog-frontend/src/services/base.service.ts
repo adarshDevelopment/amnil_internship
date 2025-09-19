@@ -6,21 +6,31 @@ export interface ISuccessResponse {
   message: string;
 }
 
+export interface IConfigParams {
+  headers?: {
+    Authorization?: string | null;
+    "Content-Type"?: "multipart/form-data" | "application/json" | string | null;
+  };
+  params?: {
+    [key: string]: string | number | undefined | boolean;
+  };
+}
+
 class BaseService {
-  getRequest = async (url: string): Promise<ISuccessResponse>  => {
-    return await axiosInstance.get(`${url}`);
+  getRequest = async (url: string, config:IConfigParams = {}): Promise<ISuccessResponse> => {
+    return await axiosInstance.get(`${url}`,config);
   };
 
-  postRequest = async (url: string, data: any): Promise<ISuccessResponse> => {
-    return await axiosInstance.post(url, data);
+  postRequest = async (url: string, data: any, config:IConfigParams = {}): Promise<ISuccessResponse> => {
+    return await axiosInstance.post(url, data, config);
   };
 
-  putRequest = async (url: string, data: any): Promise<ISuccessResponse> => {
-    return await axiosInstance.put(url, data);
+  putRequest = async (url: string, data: any,config:IConfigParams = {} ): Promise<ISuccessResponse> => {
+    return await axiosInstance.put(url, data, config);
   };
 
-  deleteRequest = async (url: string): Promise<ISuccessResponse> => {
-    return await axiosInstance.delete(url);
+  deleteRequest = async (url: string, config:IConfigParams = {}): Promise<ISuccessResponse> => {
+    return await axiosInstance.delete(url, config);
   };
 }
 

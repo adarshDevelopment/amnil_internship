@@ -5,30 +5,35 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store";
 import { userType } from "../../../config/constants";
 import { useEffect, useState } from "react";
+import { data } from "react-router-dom";
 
 interface IUserData {
   _id: string;
   name: string;
   email: string;
   userType: "admin" | "user";
+  image: "";
 }
 
 const ProfileSettings = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [localUser, setLocalUser] = useState<IUserData>();
 
-  const { register, handleSubmit, reset } = useForm<IUserData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<IUserData>({
     defaultValues: localUser,
   });
-
-
 
   const fetchUserDetail = async () => {
     try {
       const response = await authService.getRequest("/auth/me");
-      // console.log('response: ', response.data);
-      setLocalUser(response.data);
-      reset(response.data)
+
+      setLocalUser(response.data); // for state
+      reset(response.data); // for rhf
     } catch (exception) {
       toast.error("Error fetching user detail");
     }
@@ -36,27 +41,68 @@ const ProfileSettings = () => {
 
   const submitUpdateForm = async (data: IUserData) => {
     try {
-     const response =  await authService.putRequest("/auth/updateOwnProfile", data);
-     reset(response.data);
-     toast.success("User Detail succcessfully updated");
+      console.log("image: ", data.image.length);
+      let payload = {};
+
+      if (data.image.length > 0) {
+        const file = (data.image as unknown as FileList)?.[0];
+
+        payload = { ...data, image: file };
+      }else{
+        payload = {...data}
+      }
+
+      const response = await authService.putRequest(
+        "/auth/updateOwnProfile",
+        payload,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("response: ", response.data);
+      setLocalUser(response.data);
+      reset(response.data);
+      toast.success("User Detail succcessfully updated");
     } catch (exception) {
       toast.error("Problem updating user details.");
     }
   };
 
-  console.log('localuser: ', localUser);
+  // console.log("localuser: ", localUser);
   useEffect(() => {
-    
     fetchUserDetail();
   }, []);
 
   if (localUser) {
     return (
       <div className="w-2xl mx-auto flex flex-col gap-4">
-        <form onSubmit={handleSubmit(submitUpdateForm)} className="flex flex-col gap-5">
+        {/* picture */}
+        <div className="flex justify-center">
+          <div className="w-75 h-75 rounded-full">
+            <img
+              className="w-75 h-75 rounded-full"
+              src={`${
+                localUser.image ||
+                "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+              }`}
+              alt=""
+            />
+          </div>
+        </div>
+        <form
+          onSubmit={handleSubmit(submitUpdateForm)}
+          className="flex flex-col gap-5"
+        >
           {/* image */}
-          <div className="flex justify-center">
-            <div className="w-75 bg-red-400 h-75 rounded-full"></div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="name">Image</label>
+            <input
+              className="border focus:outline-none w-full border-gray-400 rounded-md px-2 py-1 cursor-pointer"
+              type="file"
+              {...register("image")}
+            />
           </div>
 
           {/* name */}
@@ -79,29 +125,32 @@ const ProfileSettings = () => {
             />
           </div>
 
-          <div className="flex flex-col gap-2 mt-4">
-            <button className=" border focus:outline-none w-full border-gray-400 bg-blue-400  mx-auto hover:bg-blue-500 cursor-pointer font-semibold text-white px-2 py-1 rounded-md">
-              Update User Detail
-            </button>
-          </div>
-
-          {/* {user?.userType === userType.admin ? (
+          {user?.userType === userType.admin ? (
             <div className="flex flex-col gap-2">
               <label htmlFor="userType">Email</label>
-              <select className="border border-gray-400 rounded-md px-2 py-1">
+              <select
+                className="border border-gray-400 rounded-md px-2 py-1"
+                disabled
+              >
                 <option value={userType.admin}>Admin</option>
                 <option value={userType.user}>User</option>
-
-                {
-                Object.entries(userType).map(key =>{
-                  return <option value={key[1]}>{key[1]}</option>
-                })
-              }
               </select>
             </div>
           ) : (
             <></>
-          )} */}
+          )}
+          <div className="flex flex-col gap-2 mt-4">
+            <button
+              disabled={isSubmitting}
+              className={`border focus:outline-none w-full border-gray-400 font-semibold text-white px-2 py-1 rounded-md ${
+                isSubmitting
+                  ? "bg-gray-400 "
+                  : "bg-blue-400  mx-auto hover:bg-blue-500  cursor-pointer"
+              } `}
+            >
+              Update User Detail
+            </button>
+          </div>
 
           {}
         </form>

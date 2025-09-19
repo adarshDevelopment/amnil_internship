@@ -22,9 +22,16 @@ const SmtpConfig = {
   from: process.env.SMTP_FROM,
 }
 
+const CloudinaryConfig = {
+  cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+  apiKey: process.env.CLOUDINARY_API_KEY,
+  apiSecret: process.env.CLOUDINARY_API_SECRET
+}
+
 module.exports = {
   AppConfig,
   MongoDbConfig,
   SmtpConfig,
-  FrontendUrl
+  FrontendUrl,
+  CloudinaryConfig
 }

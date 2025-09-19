@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import blogService from "../../services/blog.service";
 import { IoIosAddCircleOutline } from "react-icons/io";
-import { userType } from "../../config/constants";
+import { UserStatus, userType } from "../../config/constants";
 
 export interface IBlogData {
   _id: string;
@@ -63,7 +63,7 @@ const ProfilePage = () => {
           <div className="flex items-center w-2xl mx-auto justify-evenly gap-5">
             <NavLink to={`/user/${userId}/blogs`} className={({isActive})=> isActive ? 'text-teal-700 underline underline-offset-4 hover:text-teal-700 font-bold' : ''}>Blogs</NavLink>
             <div className="flex flex-col gap-4">
-              {user ? (
+              {user && user.status === UserStatus.active? (
                 <div>
                   <NavLink
                     to="/blog/create"
@@ -80,9 +80,9 @@ const ProfilePage = () => {
               )}
             </div>
 
-            {user ? <NavLink to={`/user/${userId}/settings`} className={({isActive})=> isActive ? 'text-teal-700 underline underline-offset-4 hover:text-teal-700 font-bold' : ''}>Settings</NavLink> : <></>}
+            {user && user.status === UserStatus.active ? <NavLink to={`/user/${userId}/settings`} className={({isActive})=> isActive ? 'text-teal-700 underline underline-offset-4 hover:text-teal-700 font-bold' : ''}>Settings</NavLink> : <></>}
 
-            {user && user.userType === userType.admin ? (
+            {user && user.status === UserStatus.active && user.userType === userType.admin ? (
               <>
                 <NavLink to={`/user/${userId}/tag`} className={({isActive})=> isActive ? 'text-teal-700 underline underline-offset-4 hover:text-teal-700 font-bold' : ''}>Tags</NavLink>
               </>

@@ -6,19 +6,27 @@ const jsonwebtoken = require("jsonwebtoken");
 const { AppConfig } = require("../../config/config");
 const { generateRandomString } = require("../../util/helper");
 const blogService = require("../blog/blog.service");
+const cloudinaryService = require("../../services/cloudinary.service");
+const emailService = require("../../services/email.service");
+const { UserType, UserStatus } = require("../../util/constants");
+const { options } = require("joi");
 
 class AuthController {
   register = async (req, res, next) => {
     try {
       // hash password and check for duplicate emails before inserting
       const data = await authService.transformRegisterData(req);
-      console.log("data: ", data);
-      const response = await authService.createUser(data);
-      console.log("in here");
+
+      const user = await authService.createUser(data);
+      const activationToken = generateRandomString(150);
+
+      await authService.sendActivationEmail(user, activationToken);
+      user.activationToken = activationToken;
+      user.save();
 
       res.status(201).json({
         message: "User successfully registered",
-        data: userService.getPublicUserData(response),
+        data: userService.getPublicUserData(user),
         options: null,
         status: "Success",
       });
@@ -91,6 +99,8 @@ class AuthController {
           name: user.name,
           email: user.email,
           userType: user.userType,
+          status: user.status,
+          image: user.image.secure_url,
         },
         options: null,
       });
@@ -129,6 +139,13 @@ class AuthController {
     try {
       const data = req.body;
 
+      if (req.file) {
+        const image = await cloudinaryService.uploadFile(
+          req.file.path,
+          "/UserProfiles/"
+        );
+        data["image"] = image;
+      }
       const updatedProfile = await userService.updateSingleRowByFilter(
         { _id: data._id },
         data
@@ -137,7 +154,14 @@ class AuthController {
       res.json({
         message: "Profile successfully updated",
         status: "success",
-        data: updatedProfile,
+        data: {
+          _id: updatedProfile._id,
+          name: updatedProfile.name,
+          email: updatedProfile.email,
+          userType: updatedProfile.userType,
+          status: updatedProfile.status,
+          image: updatedProfile.image.secure_url,
+        },
         options: null,
       });
     } catch (exception) {
@@ -241,6 +265,78 @@ class AuthController {
         options: null,
         message: "Token authenticated",
         status: "Success",
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
+  activateUser = async (req, res, next) => {
+    try {
+      const token = req.params.token;
+      console.log("token: ", token);
+      const user = await userService.fetchSingleRowByFilter({
+        activationToken: token,
+      });
+
+      console.log("user: ", user);
+      if (!user) {
+        throw {
+          message: "Invalid Token",
+          status: "INVALID_TOKEN",
+          code: 401,
+        };
+      }
+      if (user.status === UserStatus.active) {
+        res.json({
+          message: "User already activated!",
+          status: "Success",
+          data: null,
+          options: null,
+        });
+      }
+      const updatedUser = await userService.updateSingleRowByFilter(
+        {
+          _id: user._id,
+        },
+        {
+          activationToken: "",
+          status: UserStatus.active,
+        }
+      );
+
+      res.json({
+        message: "User successfully activated",
+        status: "Success",
+        data: updatedUser,
+        options: null,
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
+  sendVerificationEmail = async (req, res, next) => {
+    try {
+      const user = req.loggedInUser;
+      console.log("user: ", user);
+      if (user.status === UserStatus.active) {
+        res.json({
+          message: "User is already activated",
+          status: "USER_ALREADY_ACTIVATED",
+          data: null,
+          options: null,
+        });
+      }
+      const token = generateRandomString(150);
+      user.activationToken = token;
+      await user.save();
+      await authService.sendActivationEmail(user, token);
+      res.json({
+        message: "Verification Email sent",
+        status: "SCUCESS",
+        data: null,
+        options: null,
       });
     } catch (exception) {
       next(exception);

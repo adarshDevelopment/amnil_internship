@@ -7,7 +7,17 @@ const userSchema = mongoose.Schema(
     password: { type: String, required: true },
     userType: { type: String, required: true },
     forgetPasswordToken: { type: String },
-    forgetPasswordExpiry: {type: Date}
+    forgetPasswordExpiry: {type: Date},
+    image:{
+      public_id: String,
+      url: String,
+      secure_url: String
+    },
+    activationToken: String,
+    status: {
+      type: String,
+      enum: ["active", "inactive"]
+    }
   },
   {
     autoCreate: true,

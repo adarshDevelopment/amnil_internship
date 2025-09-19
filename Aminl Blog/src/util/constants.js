@@ -3,6 +3,12 @@ const UserType = {
   user: "user",
 };
 
+const UserStatus = {
+  active: 'active',
+  inactive: 'inactive'
+}
+
 module.exports = {
   UserType,
+  UserStatus
 };

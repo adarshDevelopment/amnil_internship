@@ -29,7 +29,7 @@ function GuestLayout() {
           <Outlet />
         </div>
       </div>
-      <Toaster richColors closeButton position="top-right" />
+     
     </>
   );
 }

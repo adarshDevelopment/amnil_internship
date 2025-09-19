@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 /*
   generates a random string 
   parameters: 
@@ -7,17 +9,32 @@
     a random string
 */
 const generateRandomString = (length = 150) => {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let result = ''; 
-  for (let i = 0; i <= length; i++ ) {
+  const chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i <= length; i++) {
     // selcts the nth position of `chars` which is calculated by multipling the lenght by a random number between 0-1 and using the same number without decimals
-    result +=chars.charAt(Math.floor(Math.random() * chars.length));
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
 };
 
+const deleteFile = (filePath) => {
+  try {
+    if (!fs.existsSync(filePath)) {
+      return;
+    }
+
+    fs.unlinkSync(filePath);
+  } catch (exception) {
+    throw {
+      message: "Error deleting file",
+      status: "ERROR_DELETING_FILE",
+    };
+  }
+};
 
 module.exports = {
-  generateRandomString
-}
-
+  generateRandomString,
+  deleteFile
+};

@@ -17,6 +17,7 @@ import ProfileSettings from "../../pages/auth/profilepages/ProfileSettings";
 import AdminRoutes from "./AdminRoutes.routes";
 import ForgetPassword from "../../pages/auth/ForgetPassword";
 import ResetPassword from "../../pages/auth/ResetPassword";
+import UserActivation from "../../pages/auth/UserActivation";
 
 const router = createBrowserRouter([
   {
@@ -65,6 +66,7 @@ const router = createBrowserRouter([
       { path: "/register", Component: RegsiterPage },
       { path: "/forget-password", element: <ForgetPassword /> },
       { path: "/reset-password/:token", element: <ResetPassword /> },
+      {path:"/user-activation/:token", element: < UserActivation/>}
     ],
   },
 ]);

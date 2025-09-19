@@ -12,7 +12,6 @@ class EmailService {
           pass: SmtpConfig.password,
         },
       };
-      console.log('transportObj: ', transPortObj);
       this.transporter = nodemailer.createTransport(transPortObj);
     } catch (exception) {
       console.log("exception in createTransport");

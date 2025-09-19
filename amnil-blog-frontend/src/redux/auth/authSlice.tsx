@@ -7,7 +7,9 @@ interface IInitialState {
     _id: string;
     name: string;
     email: string;
-    userType: string
+    userType: string,
+    status: string,
+    image: string
   } | null;
   status: "idle" | "loading" | "succeeded" | "failed";
 }
