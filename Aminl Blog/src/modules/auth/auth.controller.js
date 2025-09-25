@@ -123,7 +123,6 @@ class AuthController {
       const yourBlogs = await blogService.fetchMultipleRowsByFilter({
         user: userId,
       });
-      console.log("yourBLogs: ", yourBlogs);
       res.json({
         message: "Your blogs successfully fetched",
         status: "success",
@@ -138,14 +137,20 @@ class AuthController {
   updateOwnProfile = async (req, res, next) => {
     try {
       const data = req.body;
+      console.log('data: ', data );
 
+      
+      
       if (req.file) {
         const image = await cloudinaryService.uploadFile(
           req.file.path,
           "/UserProfiles/"
         );
         data["image"] = image;
+      }else{
+        data['image'] = req.loggedInUser.image
       }
+
       const updatedProfile = await userService.updateSingleRowByFilter(
         { _id: data._id },
         data

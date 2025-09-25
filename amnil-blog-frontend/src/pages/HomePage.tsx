@@ -25,7 +25,7 @@ interface IBlogData {
   };
 }
 
-interface IPaginationData {
+export interface IPaginationData {
   page?: number;
   limit?: number;
   totalCount: number;

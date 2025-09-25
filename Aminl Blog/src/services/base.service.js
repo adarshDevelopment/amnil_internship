@@ -20,6 +20,10 @@ class BaseService {
     return await this.model.findOneAndUpdate(filter, data, { new: true });
   };
 
+  deleteSingleRowByFilter = async (filter)=>{
+    return await this.model.findOneAndDelete(filter);
+  }
+
   // function to verify if the record exists. returns the data if it exists
   verifyData = async (_id) => {
     try {

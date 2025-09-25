@@ -18,6 +18,9 @@ import AdminRoutes from "./AdminRoutes.routes";
 import ForgetPassword from "../../pages/auth/ForgetPassword";
 import ResetPassword from "../../pages/auth/ResetPassword";
 import UserActivation from "../../pages/auth/UserActivation";
+import ListProduct from "../../pages/product/DisplayProduct";
+import ProductIndex from "../../pages/product/ProductIndex";
+import CreateProduct from "../../pages/product/CreateProduct";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +59,20 @@ const router = createBrowserRouter([
           },
         ],
       },
+
+      {
+        path:"/shop",
+        element: <ListProduct/>
+      },
+      {
+        path:"/products",
+        element: <ProductIndex/>,
+        children: [
+          
+
+        ]
+      },
+      {path:"products/create", element: <CreateProduct/>} 
     ],
   },
 

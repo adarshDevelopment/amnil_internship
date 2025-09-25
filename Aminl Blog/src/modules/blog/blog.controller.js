@@ -192,7 +192,6 @@ class BlogController {
       const yourBlogs = await blogService.fetchMultipleRowsByFilter({
         user: req.loggedInUserId,
       });
-      console.log("yourBLogs: ", yourBlogs);
       res.json({
         message: "Your blogs successfully fetched",
         status: "success",

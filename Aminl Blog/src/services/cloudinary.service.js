@@ -1,6 +1,6 @@
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryConfig } = require("../config/config");
-const {deleteFile} = require('../util/helper')
+const { deleteFile } = require("../util/helper");
 class CloudinaryService {
   constructor() {
     cloudinary.config({
@@ -19,7 +19,7 @@ class CloudinaryService {
           folder: "/amnil-blog" + dir,
         }
       );
-      
+
       deleteFile(filePath);
       return {
         public_id,
@@ -30,6 +30,18 @@ class CloudinaryService {
       throw {
         message: "Error uploading file on Cloudinary",
         status: "CLOUDINARY_FAILURE",
+      };
+    }
+  };
+
+  deleteFile = async (publicId) => {
+    try {
+      const result =await cloudinary.uploader.destroy(publicId);
+      return result;
+    } catch (exception) {
+      throw {
+        message: "Error deleting picture in cloud",
+        status: "PICTURE_DELETE_ERROR",
       };
     }
   };

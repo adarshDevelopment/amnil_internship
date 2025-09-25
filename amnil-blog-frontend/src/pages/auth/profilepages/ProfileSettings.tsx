@@ -41,17 +41,22 @@ const ProfileSettings = () => {
 
   const submitUpdateForm = async (data: IUserData) => {
     try {
-      console.log("image: ", data.image.length);
+      // console.log('data: ', data);
+      console.log("image: ", data.image);
+      // return;
       let payload = {};
-
+      
       if (data.image.length > 0) {
+        console.log('inside if');
         const file = (data.image as unknown as FileList)?.[0];
 
         payload = { ...data, image: file };
-      }else{
-        payload = {...data}
+      } else {
+        console.log('data inside else: ', data);
+        payload = { ...data };
       }
 
+      
       const response = await authService.putRequest(
         "/auth/updateOwnProfile",
         payload,

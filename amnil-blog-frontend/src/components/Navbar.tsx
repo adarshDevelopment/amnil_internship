@@ -21,7 +21,10 @@ const Navbar = () => {
       dispatch(logout());
     }
   };
-  const { handleSubmit, formState:{isSubmitting} } = useForm();
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm();
   const sendVerificationEmail = async (data: {}) => {
     try {
       await authService.postRequest("/auth/send-verification-email", {});
@@ -35,16 +38,41 @@ const Navbar = () => {
     <>
       <div className="h-16 bg-blue-40 fixed top-0 w-full bg-indigo-100 ">
         <div className="container mx-auto h-full flex items-center bg-pink-40 justify-between gap-4">
-          <NavLink
-            to={"/"}
-            className={({ isActive }) =>
-              isActive
-                ? "text-teal-700 underline underline-offset-4 hover:text-teal-700"
-                : "hover:text-gray-500"
-            }
-          >
-            <IoHomeOutline className="text-3xl" />
-          </NavLink>
+          <div className="flex items-end gap-4">
+            <NavLink
+              to={"/"}
+              className={({ isActive }) =>
+                isActive
+                  ? "text-teal-700 underline underline-offset-4 hover:text-teal-700"
+                  : "hover:text-gray-500"
+              }
+            >
+              <IoHomeOutline className="text-3xl" />
+            </NavLink>
+
+            <NavLink
+              to="/shop"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-teal-700 underline underline-offset-4 hover:text-teal-700"
+                  : "hover:text-gray-500"
+              }
+            >
+              Shop
+            </NavLink>
+
+            <NavLink
+              to="/products"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-teal-700 underline underline-offset-4 hover:text-teal-700"
+                  : "hover:text-gray-500"
+              }
+            >
+              Products Page
+            </NavLink>
+          </div>
+
           <div className="flex items-center gap-4">
             {user ? (
               <>
@@ -58,12 +86,19 @@ const Navbar = () => {
                 >
                   {user.name}
                 </NavLink>
-                { user.status === UserStatus.inactive || !user.status ? (
+                {user.status === UserStatus.inactive || !user.status ? (
                   <form
                     onSubmit={handleSubmit(sendVerificationEmail)}
                     className=""
                   >
-                    <button disabled={isSubmitting} className={`flex items-center gap-1  ${isSubmitting ? 'hover:text-teal-600' : 'cursor-pointer hover:text-teal-600'}`}>
+                    <button
+                      disabled={isSubmitting}
+                      className={`flex items-center gap-1  ${
+                        isSubmitting
+                          ? "hover:text-teal-600"
+                          : "cursor-pointer hover:text-teal-600"
+                      }`}
+                    >
                       Verification <MdOutlineEmail className="text-lg" />
                     </button>
                   </form>
