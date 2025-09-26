@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import productService from "../../services/product.service";
 import type { IPaginationData } from "../HomePage";
+import { Sort } from "../../config/constants";
 export interface IProduct {
   _id: string;
   title: string;
@@ -26,6 +27,7 @@ const DisplayProduct = () => {
   const [searchKeyword, setSearchKeyword] = useState<string>("");
   const [searchCategory, setSearchCategory] = useState<string>("");
   const [page, setPage] = useState<number>(1);
+  const [sort, setSort] = useState<string>(Sort.asc);
 
   const [pagination, setPagination] = useState<IPaginationData>();
 
@@ -33,7 +35,7 @@ const DisplayProduct = () => {
     try {
       console.log("inside fetchProducts");
       const response = await productService.getRequest(
-        `/product?search=${searchKeyword}&category=${searchCategory}&minPrice=${minRange}&maxPrice=${maxRange}&page=${pageNumber}&limit=6`
+        `/product?search=${searchKeyword}&category=${searchCategory}&minPrice=${minRange}&maxPrice=${maxRange}&page=${pageNumber}&limit=6&sort=${sort}`
       );
       setProducts(response.data);
       setPagination(response.options.pagination);
@@ -58,7 +60,7 @@ const DisplayProduct = () => {
   console.log("page: ", page);
   useEffect(() => {
     fetchProducts(page);
-  }, [minRange, maxRange, searchCategory, searchKeyword, page]);
+  }, [minRange, maxRange, searchCategory, searchKeyword, page, sort]);
   return (
     <>
       <div className="bg-red-40 w-full mx-auto grid grid-cols-8 ">
@@ -78,6 +80,7 @@ const DisplayProduct = () => {
 
             {/* category select */}
             <div>
+              <span>Category</span>
               <select
                 onChange={(e) => setSearchCategory(e.target.value)}
                 name="categorySearch"
@@ -97,7 +100,7 @@ const DisplayProduct = () => {
 
             {/* Min slider */}
             <div className="flex flex-col">
-              <span>Min Range {minRange}</span>
+              <span>Min Range</span>
               {/* <input min={0} max={100000} type="range" value={minRange} onChange={(e)=>setMinRange(+e.target.value)} className="w-full active:bg-red-300" /> */}
               <input
                 type="number"
@@ -109,13 +112,14 @@ const DisplayProduct = () => {
 
             {/* Max slider */}
             <div className="flex flex-col">
-              <span>Min Range: Rs. {maxRange}</span>
+              <span>Min Range</span>
               <input
                 type="number"
                 value={maxRange}
                 onChange={(e) => setMaxRange(+e.target.value)}
                 className="border border-gray-400 w-full px-2 py-1 focus:outline-none rounded-sm"
               />
+
               {/* <input
               min={0}
               max={100000}
@@ -126,6 +130,22 @@ const DisplayProduct = () => {
             /> */}
             </div>
 
+            {/* Sort by Price */}
+            <div className="flex flex-col">
+              <span>Sort by price</span>
+              {/* <input min={0} max={100000} type="range" value={minRange} onChange={(e)=>setMinRange(+e.target.value)} className="w-full active:bg-red-300" /> */}
+              <select
+                value={sort}
+                onChange={(e) => {
+                  setSort(e.target.value);
+                }}
+                id=""
+                className="border border-gray-400 w-full px-2 py-1 focus:outline-none rounded-sm"
+              >
+                <option value={Sort.asc}>Ascending</option>
+                <option value={Sort.desc}>Descending</option>
+              </select>
+            </div>
             {/* Pagination */}
             <div className="flex items-center gap-3 justify-center">
               <button
