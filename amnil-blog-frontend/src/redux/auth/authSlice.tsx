@@ -23,7 +23,6 @@ const initialState: IInitialState = {
 export const fetchUser = createAsyncThunk("User/fetchUser", async () => {
   const response =  await authService.getRequest("auth/me");
   return response;
-  console.log('response: ', response);
 });
 
 const authSlice = createSlice({

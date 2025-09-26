@@ -39,11 +39,10 @@ class ProductService extends BaseService {
     // check if the user and the product's user is the same=
     const user = req.loggedInUser;
 
-    console.log("user: ", user);
     console.log("product: ", product);
-    const isAdmin = user.UserType ==='admin';
-    const isUser =product.user.toString() === user._id.toString()
-    if (!(isAdmin || isUser) ) {
+    const isAdmin = user.UserType === "admin";
+    const isUser = product.user.toString() === user._id.toString();
+    if (!(isAdmin || isUser)) {
       throw {
         message: "You cannot make changes to this product",
         status: "Unauthorized",
@@ -56,18 +55,23 @@ class ProductService extends BaseService {
 
     // if req has file, delete the old one and upload new picture
     if (req.file) {
-      const response = await cloudinaryService.deleteFile(
-        product.image.public_id
-      );
+      if (product.image?.public_id) {
+        const response = await cloudinaryService.deleteFile(
+          product.image.public_id
+        );
+      }
+
       const image = await cloudinaryService.uploadFile(
         req.file.path,
         "/products/"
       );
       data["image"] = image;
-    } else {
-      // if req does not have file attached to it, attach the old image to data and return data
-      data["image"] = product.image;
-    }
+    } 
+    
+    // else {
+    //   // if req does not have file attached to it, attach the old image to data and return data
+    //   data["image"] = product.image;
+    // }
 
     // return dats
     return data;
@@ -79,7 +83,7 @@ class ProductService extends BaseService {
     const limit = +query.limit || 5;
     const skip = (page - 1) * limit;
 
-    const sortBy = query.sort === "desc" ? -1 : query.sort === "asc" ? 1 : -1;
+    const sortBy = query.sort === "desc" ? -1 : query.sort === "asc" ? 1 : 1;
 
     const [data, totalCount] = await Promise.all([
       this.model.find(filter).limit(limit).skip(skip).sort({ price: sortBy }),

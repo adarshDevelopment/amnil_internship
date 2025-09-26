@@ -36,9 +36,11 @@ class CloudinaryService {
 
   deleteFile = async (publicId) => {
     try {
-      const result =await cloudinary.uploader.destroy(publicId);
+      console.log('public ID: ', publicId)
+      const result = await cloudinary.uploader.destroy(publicId);
       return result;
     } catch (exception) {
+      console.log("cloudinary delet: ", exception);
       throw {
         message: "Error deleting picture in cloud",
         status: "PICTURE_DELETE_ERROR",

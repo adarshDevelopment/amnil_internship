@@ -21,6 +21,8 @@ import UserActivation from "../../pages/auth/UserActivation";
 import ListProduct from "../../pages/product/DisplayProduct";
 import ProductIndex from "../../pages/product/ProductIndex";
 import CreateProduct from "../../pages/product/CreateProduct";
+import ProductShow from "../../pages/product/ProductShow";
+import EditProduct from "../../pages/product/EditProduct";
 
 const router = createBrowserRouter([
   {
@@ -39,6 +41,13 @@ const router = createBrowserRouter([
           },
           { path: "/blog/edit/:slug", element: <EditBlogPage /> },
           { path: "/tag/:tag", element: <FilterPage /> },
+          { path: "products/create", element: <CreateProduct /> },
+          {
+            path: "/products",
+            element: <ProductIndex />,
+          },
+          {path: "/products/:id", element:<ProductShow/>},
+          {path:"products/edit/:id", element: <EditProduct/> }
         ],
       },
 
@@ -61,18 +70,9 @@ const router = createBrowserRouter([
       },
 
       {
-        path:"/shop",
-        element: <ListProduct/>
+        path: "/shop",
+        element: <ListProduct />,
       },
-      {
-        path:"/products",
-        element: <ProductIndex/>,
-        children: [
-          
-
-        ]
-      },
-      {path:"products/create", element: <CreateProduct/>} 
     ],
   },
 
@@ -83,7 +83,7 @@ const router = createBrowserRouter([
       { path: "/register", Component: RegsiterPage },
       { path: "/forget-password", element: <ForgetPassword /> },
       { path: "/reset-password/:token", element: <ResetPassword /> },
-      {path:"/user-activation/:token", element: < UserActivation/>}
+      { path: "/user-activation/:token", element: <UserActivation /> },
     ],
   },
 ]);

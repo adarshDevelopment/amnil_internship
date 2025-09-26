@@ -38,7 +38,6 @@ const CreateBlogPage = () => {
     try {
       const response = await blogService.postRequest("/blog", data);
       toast.success("blog successfully posted");
-      console.log('response: ', response);
       const slug = response.data.slug;
       navigate(`/blog/${slug}`)
     } catch (exception) {

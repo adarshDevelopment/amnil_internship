@@ -42,21 +42,17 @@ const ProfileSettings = () => {
   const submitUpdateForm = async (data: IUserData) => {
     try {
       // console.log('data: ', data);
-      console.log("image: ", data.image);
-      // return;
-      let payload = {};
-      
-      if (data.image.length > 0) {
-        console.log('inside if');
-        const file = (data.image as unknown as FileList)?.[0];
 
-        payload = { ...data, image: file };
+      let payload = {};
+
+      if ((data.image as any) instanceof FileList && data.image.length > 0) {
+        // const file = (data.image as unknown as FileList)?.[0];
+
+        payload = { ...data, image: data.image[0] };
       } else {
-        console.log('data inside else: ', data);
         payload = { ...data };
       }
 
-      
       const response = await authService.putRequest(
         "/auth/updateOwnProfile",
         payload,
@@ -66,7 +62,6 @@ const ProfileSettings = () => {
           },
         }
       );
-      console.log("response: ", response.data);
       setLocalUser(response.data);
       reset(response.data);
       toast.success("User Detail succcessfully updated");

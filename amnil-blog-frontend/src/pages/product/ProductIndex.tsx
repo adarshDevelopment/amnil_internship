@@ -6,21 +6,44 @@ import { MdDelete } from "react-icons/md";
 import { useEffect, useState } from "react";
 import { MdEdit } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
+import type { IPaginationData } from "../HomePage";
 
 const ProductIndex = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
-  const fetchProducts = async () => {
+  const [pagination, setPagination] = useState<IPaginationData>();
+  const [page, setPage] = useState<number>(1);
+
+  const fetchProducts = async (pageNumber: number) => {
     try {
-      const response = await productService.getRequest("/product");
+      const response = await productService.getRequest(
+        `/product?page=${pageNumber}&limit=6`
+      );
+      setPagination(response.options.pagination);
       setProducts(response.data);
     } catch (exception) {
       toast.error("Error fetching products");
     }
   };
 
+  const deleteProduct = async (id: string) => {
+    try {
+      const answer = window.confirm(
+        "Are you sure you want to delete this product?"
+      );
+      if (!answer) {
+        return;
+      }
+      const reponse = await productService.deleteRequest(`/product/${id}`);
+      fetchProducts(pagination?.page as number);
+      toast.success("Product successfully deleted");
+    } catch (exception) {
+      toast.error("Error deleting post");
+    }
+  };
+
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchProducts(page);
+  }, [page]);
   if (products) {
     return (
       <>
@@ -55,35 +78,85 @@ const ProductIndex = () => {
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody className="text-gray-600">
                 {products.map((product, index) => (
                   <tr key={product._id}>
                     <td className="text-center">{index + 1}</td>
-                    <td className="p-5">{product.title}</td>
+                    <td className="p-5"><NavLink className={'font-bold hover:text-teal-600'} to={`/products/${product._id}`}>{product.title}</NavLink></td>
                     <td>Rs. {product.price}</td>
                     <td>{product.stock}</td>
-                    <td className="">
-                      {/* <img
-                        className="h-[50px] object-contain"
-                        src={product.image}
-                        alt=""
-                      /> */}
-                      img
+                    <td className="py-5  ">
+                      {product.image ? (
+                        <img
+                          className="h-[50px] object-contain"
+                          src={product.image}
+                          alt=""
+                        />
+                      ) : (
+                        <img
+                        className="h-[50px]"
+                          src="https://thumbs.dreamstime.com/b/image-not-available-icon-vector-set-white-background-eps-330821927.jpg"
+                          alt=""
+                        />
+                      )}
                     </td>
                     <td className=" justify-center items-end h-full">
                       <div className="flex justify-center items-end gap-3">
-                        <button>
-                          <MdDelete className="text-2xl text-red-600" />
+                        <button
+                          className="cursor-pointer hover:text-red-700"
+                          onClick={() => {
+                            deleteProduct(product._id);
+                          }}
+                        >
+                          <MdDelete className="text-2xl " />
                         </button>
-                        <button>
-                          <MdEdit className="text-2xl text-yellow-600" />
-                        </button>
+                        <NavLink to={`/products/edit/${product._id}`} className="cursor-pointer">
+                          <MdEdit className="text-2xl text-yellow-600 hover:text-yellow-700" />
+                        </NavLink>
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination */}
+
+            <div className="flex justify-center items-center mt-5 gap-4">
+              <button
+                disabled={pagination?.page === 1}
+                onClick={() => {
+                  setPage((page) => {
+                    return page - 1;
+                  });
+                }}
+                className={
+                  pagination?.page === 1
+                    ? "font-bold text-gray-400"
+                    : "font-bold text-teal-600 cursor-pointer"
+                }
+              >
+                Prev
+              </button>
+              <span>
+                {pagination?.page} of {pagination?.totalPages}
+              </span>
+              <button
+                onClick={() => {
+                  setPage((prev) => {
+                    return prev + 1;
+                  });
+                }}
+                disabled={pagination?.page === pagination?.totalPages}
+                className={
+                  pagination?.page === pagination?.totalPages
+                    ? "font-bold text-gray-400 "
+                    : "font-bold text-teal-600 cursor-pointer"
+                }
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </>

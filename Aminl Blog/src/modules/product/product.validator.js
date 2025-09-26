@@ -6,7 +6,7 @@ const CreateProductDTO = Joi.object({
   stock: Joi.number().min(1).max(100),
   category: Joi.string().required(),
   description: Joi.string().allow("", null),
-  image: Joi.string().allow("", null),
+  image: Joi.any().allow("", null),
 });
 
 
@@ -16,7 +16,7 @@ const UpdateProductDTO = Joi.object({
   stock: Joi.number().min(1).max(100),
   category: Joi.string().required(),
   description: Joi.string().allow("", null),
-  image: Joi.string().allow("", null),
+  image: Joi.any().allow("", null),
 });
 
 module.exports = {

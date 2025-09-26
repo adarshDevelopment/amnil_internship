@@ -1,20 +1,24 @@
 import { IoMdAdd } from "react-icons/io";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
 import type { IProduct } from "./DisplayProduct";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import productService from "../../services/product.service";
 import { useEffect, useState } from "react";
 import type { ICategory } from "./DisplayProduct";
 
-const CreateProduct = () => {
+const EditProduct = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
-  const navigate = useNavigate()
+  const [product, setProduct] = useState<IProduct>();
+  const navigate = useNavigate();
+  const id = useParams().id;
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue,
     setError,
+    reset,
   } = useForm<IProduct>();
 
   const fetchCategory = async () => {
@@ -26,29 +30,48 @@ const CreateProduct = () => {
     }
   };
 
-  const submitProductsForm = async (data: IProduct) => {
+  const fetchExistingData = async () => {
+    try {
+      const response = await productService.getRequest(`/product/${id}`);
+      const actualProduct = {
+        ...response.data,
+        category: response.data.category._id,
+      };
+      setProduct(actualProduct);
+      reset(actualProduct);
+    } catch (exception) {
+      toast.error("Error fetching old data");
+    }
+  };
+
+  const updateProduct = async (data: IProduct) => {
     try {
       let payload = {};
 
-      if (data.image.length > 0) {
-        const file = data.image[0];
-        payload = { ...data, image: file };
-      } else {
-        payload = { ...data };
+      if ((data.image as any) instanceof FileList && data.image.length > 0) {
+        payload = { image: data.image[0] };
       }
 
-      console.log(data);
-      console.log("payload: ", payload);
+      payload = {
+        ...payload,
+        title: data.title,
+        price: data.price,
+        stock: data.stock,
+        category: data.category,
+        description: data.description,
+      };
 
-      const response = await productService.postRequest("/product", payload, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      toast.success("Product successfully added");
-      const id = response.data._id;
-      navigate(`/products/${id}`);
+      const response = await productService.putRequest(
+        `/product/${id}`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      toast.success("Product successfully updated");
+      navigate(`/products/${response.data._id}`);
     } catch (exception: any) {
       if (exception.error) {
         Object.keys(exception.error).map((error) => {
@@ -62,6 +85,7 @@ const CreateProduct = () => {
 
   useEffect(() => {
     fetchCategory();
+    fetchExistingData();
   }, []);
 
   return (
@@ -69,7 +93,7 @@ const CreateProduct = () => {
       <div className="bg-red-40 w-4xl mx-auto flex flex-col gap-5 ">
         {/* top buttons */}
         <div className="flex justify-between items-center">
-          <div className="text-gray-500 font-bold text-2xl">Add Product</div>
+          <div className="text-gray-500 font-bold text-2xl">Edit Product</div>
           <NavLink
             to={"/products"}
             className={
@@ -85,9 +109,36 @@ const CreateProduct = () => {
         {/* product table */}
 
         <form
-          onSubmit={handleSubmit(submitProductsForm)}
+          onSubmit={handleSubmit(updateProduct)}
           className="bg-green-40 w-4xl mx-auto flex flex-col gap-4"
         >
+          {product?.image ? (
+            <div className="flex flex-col gap-2 h-[200px] text-gray-500 font-semibold">
+              <img
+                className="h-full object-contain"
+                src={product.image}
+                alt=""
+              />
+            </div>
+          ) : (
+            <></>
+          )}
+
+          {/* Image */}
+          <div className="flex flex-col gap-2 text-gray-500 font-semibold">
+            <span>Image</span>
+            <div className="flex flex-col gap-">
+              <input
+                type="file"
+                {...register("image")}
+                className="focus:outline-none border-gray-400 border px-2 py-1 rounded-md"
+              />
+              <span className="text-red-600 text-sm">
+                {errors.image?.message}
+              </span>
+            </div>
+          </div>
+
           {/* title */}
           <div className="flex flex-col gap-2 text-gray-500 font-semibold">
             <span>Title</span>
@@ -103,7 +154,7 @@ const CreateProduct = () => {
             </div>
           </div>
 
-          {/* title */}
+          {/* Price */}
           <div className="flex flex-col gap-2 text-gray-500 font-semibold">
             <span>Price</span>
             <div className="flex flex-col gap-">
@@ -118,7 +169,7 @@ const CreateProduct = () => {
             </div>
           </div>
 
-          {/* title */}
+          {/*Stock */}
           <div className="flex flex-col gap-2 text-gray-500 font-semibold">
             <span>Stock</span>
             <div className="flex flex-col gap-">
@@ -133,7 +184,7 @@ const CreateProduct = () => {
             </div>
           </div>
 
-          {/* category */}
+          {/* Category */}
           <div className="flex flex-col gap-2 text-gray-500 font-semibold">
             <span>Category</span>
             <div className="flex flex-col gap-">
@@ -153,9 +204,7 @@ const CreateProduct = () => {
             </div>
           </div>
 
-          {/* description */}
-
-          {/* description */}
+          {/* Description */}
           <div className="flex flex-col gap-2 text-gray-500 font-semibold">
             <span>Description</span>
             <div className="flex flex-col gap-">
@@ -165,21 +214,6 @@ const CreateProduct = () => {
               />
               <span className="text-red-600 text-sm">
                 {errors.description?.message}
-              </span>
-            </div>
-          </div>
-
-          {/* Image */}
-          <div className="flex flex-col gap-2 text-gray-500 font-semibold">
-            <span>Image</span>
-            <div className="flex flex-col gap-">
-              <input
-                type="file"
-                {...register("image")}
-                className="focus:outline-none border-gray-400 border px-2 py-1 rounded-md"
-              />
-              <span className="text-red-600 text-sm">
-                {errors.image?.message}
               </span>
             </div>
           </div>
@@ -201,4 +235,4 @@ const CreateProduct = () => {
   );
 };
 
-export default CreateProduct;
+export default EditProduct;

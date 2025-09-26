@@ -15,7 +15,6 @@ const TagIndex = () => {
     try {
       const response = await tagService.getRequest("/tag");
       setTags(response.data);
-      console.log("response: ", response);
     } catch (exception) {}
   };
 

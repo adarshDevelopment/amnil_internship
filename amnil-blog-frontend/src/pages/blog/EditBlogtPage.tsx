@@ -49,7 +49,6 @@ const EditBlogPage = () => {
       const response = await blogService.getRequest(`/blog/${slug}`);
       setBlog(response.data);
       reset({ ...response.data, tag: response.data.tag._id });
-      console.log("response: ", response);
     } catch (exception) {
       toast.error("Error fetching blog");
     }
